@@ -7,55 +7,34 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const filePath = path.join(__dirname, "db.json");
-
-const readData = () => {
-  return JSON.parse(fs.readFileSync(filePath));
-};
-
-const writeData = (data) => {
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-};
+let transactions = [];
 
 app.get("/transactions", (req, res) => {
-  const data = readData();
-  res.json(data.transactions);
+  res.json(transactions);
 });
 
 app.post("/transactions", (req, res) => {
-  const data = readData();
-
   const newTransaction = {
     id: Date.now(),
     ...req.body
   };
 
-  data.transactions.push(newTransaction);
-  writeData(data);
-
+  transactions.push(newTransaction);
   res.json(newTransaction);
 });
 
 app.put("/transactions/:id", (req, res) => {
-  const data = readData();
-
-  data.transactions = data.transactions.map(t =>
+  transactions = transactions.map(t =>
     t.id == req.params.id ? { ...t, ...req.body } : t
   );
-
-  writeData(data);
 
   res.json({ message: "Updated" });
 });
 
 app.delete("/transactions/:id", (req, res) => {
-  const data = readData();
-
-  data.transactions = data.transactions.filter(
+  transactions = transactions.filter(
     t => t.id != req.params.id
   );
-
-  writeData(data);
 
   res.json({ message: "Deleted" });
 });
